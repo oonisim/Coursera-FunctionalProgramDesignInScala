@@ -91,9 +91,15 @@ trait Solver extends GameDef {
    * Returns a stream of all possible pairs of the goal block along
    * with the history how it was reached.
    */
+  /* // This is just filtering.
   lazy val pathsToGoal: Stream[(Block, List[Move])] = for {
     (block, moves) <- pathsFromStart if (done(block))
   } yield (block, moves)
+  */
+  // same with below
+  //lazy val pathsToGoal: Stream[(Block, List[Move])] = pathsFromStart filter (neighbor => neighbor match { case(b,m) => done(b) }
+  lazy val pathsToGoal: Stream[(Block, List[Move])] = pathsFromStart filter { case(b,m) => done(b) }
+
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the

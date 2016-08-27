@@ -76,7 +76,7 @@ trait Solver extends GameDef {
         (b, history) <- initial
         neighbor <- newNeighborsOnly(neighborsWithHistory(b, history), explored)
       } yield neighbor
-      // In the next call of from(), 'neighbours' is added again as 'initial'.
+      // In the next call of from(), 'neighbors' is added again as 'initial'.
       // initial ++ neighbors ++ from(neighbors, neighbors.foldLeft(explored)(_ + _._1))
       neighbors ++ from(neighbors, neighbors.foldLeft(explored)(_ + _._1))
     }
@@ -91,7 +91,10 @@ trait Solver extends GameDef {
    * Returns a stream of all possible pairs of the goal block along
    * with the history how it was reached.
    */
-  /* // This is just filtering.
+  /* 
+   * !!! Write the concept, NOT procedures !!!
+   * This is just filtering. If the act is 'filter' then use filter.
+   * 
   lazy val pathsToGoal: Stream[(Block, List[Move])] = for {
     (block, moves) <- pathsFromStart if (done(block))
   } yield (block, moves)

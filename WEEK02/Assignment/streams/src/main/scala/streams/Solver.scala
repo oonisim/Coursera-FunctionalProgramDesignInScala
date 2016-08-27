@@ -40,7 +40,8 @@ trait Solver extends GameDef {
    * positions that have already been explored. We will use it to
    * make sure that we don't explore circular paths.
    */
-  def newNeighborsOnly(neighbors: Stream[(Block, List[Move])], explored: Set[Block]): Stream[(Block, List[Move])] = {
+  def newNeighborsOnly(neighbors: Stream[(Block, List[Move])],
+                       explored: Set[Block]): Stream[(Block, List[Move])] = {
     // Remove blocks in neighbours which have been in explorered
     for ((block, moves) <- neighbors if (!explored.contains(block))) yield (block, moves)
   }
@@ -76,8 +77,10 @@ trait Solver extends GameDef {
         (b, history) <- initial
         neighbor <- newNeighborsOnly(neighborsWithHistory(b, history), explored)
       } yield neighbor
+      // [Bug] -----
       // In the next call of from(), 'neighbors' is added again as 'initial'.
       // initial ++ neighbors ++ from(neighbors, neighbors.foldLeft(explored)(_ + _._1))
+      // -----
       neighbors ++ from(neighbors, neighbors.foldLeft(explored)(_ + _._1))
     }
   }
@@ -85,7 +88,8 @@ trait Solver extends GameDef {
   /**
    * The stream of all paths that begin at the starting block.
    */
-  lazy val pathsFromStart: Stream[(Block, List[Move])] = from(Stream((startBlock, Nil)), Set(startBlock))
+  lazy val pathsFromStart: Stream[(Block, List[Move])] =
+    from(Stream((startBlock, Nil)), Set(startBlock))
 
   /**
    * Returns a stream of all possible pairs of the goal block along
@@ -101,8 +105,8 @@ trait Solver extends GameDef {
   */
   // same with below
   //lazy val pathsToGoal: Stream[(Block, List[Move])] = pathsFromStart filter (neighbor => neighbor match { case(b,m) => done(b) }
-  lazy val pathsToGoal: Stream[(Block, List[Move])] = pathsFromStart filter { case(b,m) => done(b) }
-
+  lazy val pathsToGoal: Stream[(Block, List[Move])] =
+    pathsFromStart filter { case (b, m) => done(b) }
 
   /**
    * The (or one of the) shortest sequence(s) of moves to reach the
@@ -113,7 +117,7 @@ trait Solver extends GameDef {
    * position.
    */
   lazy val solution: List[Move] = {
-    if (!pathsToGoal.isEmpty) pathsToGoal.head._2.reverse 
+    if (!pathsToGoal.isEmpty) pathsToGoal.head._2.reverse
     else Nil
   }
 }

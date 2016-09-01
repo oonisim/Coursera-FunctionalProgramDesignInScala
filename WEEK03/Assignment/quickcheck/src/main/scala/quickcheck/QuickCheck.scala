@@ -24,23 +24,20 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   lazy val genHeap: Gen[H] = gen(0)
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
 
-  println("gen1")
+  
   property("gen1") = forAll(genHeap) { (h: H) =>
     val m = if (isEmpty(h)) 0 else findMin(h)
     findMin(insert(m, h)) == m
   }
 
-  println("Add the deleten")
   property("On Empty, add then delete it is empty") = {
     isEmpty(deleteMin(insert(1, empty)))
   }
   
-  println("Add two on empty the deleten")
-  property("Add two on Empty") = {
+    property("Add two on Empty") = {
     findMin(insert(2, insert(1, empty))) == 1
   }
 
-  println("delete min the no more that min")
   property("Delete min then no more that min") = forAll(genHeap) { (h: H) =>
     if (isEmpty(h)) false
     else {
@@ -50,7 +47,6 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
     }
   }
 
-  println("min of meld")
   property("Min of melding is the same with that of being melded") = forAll(genHeap, genHeap) {
     (f: H, s: H) => findMin(meld(f, s)) == Math.min(findMin(f), findMin(s))
   }

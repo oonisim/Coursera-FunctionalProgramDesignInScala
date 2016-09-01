@@ -50,22 +50,25 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   property("min of melding") = forAll(genHeap, genHeap) {
     (f: H, s: H) =>
       {
-        val fm = findMin(f)
-        val sm = findMin(s)
-        findMin(meld(f, s)) == Math.min(fm, sm)
+        if (isEmpty(f) && isEmpty(s)) false
+        else {
+          val fm = if (isEmpty(f)) findMin(s) else findMin(f)
+          val sm = if (isEmpty(s)) findMin(f) else findMin(s)
+          findMin(meld(f, s)) == Math.min(fm, sm)
+        }
       }
   }
 
   property("sorted") = forAll(genHeap) {
-    (h: H) => 
-      if(isEmpty(h)) true
-      else checkSorted(findMin(h), h) 
+    (h: H) =>
+      if (isEmpty(h)) true
+      else checkSorted(findMin(h), h)
   }
   def checkSorted(prev: Int, h: H): Boolean = {
-    if(isEmpty(h)) true
+    if (isEmpty(h)) true
     else {
       val cur = findMin(h)
-      if(prev > cur) false
+      if (prev > cur) false
       else checkSorted(cur, deleteMin(h))
     }
   }

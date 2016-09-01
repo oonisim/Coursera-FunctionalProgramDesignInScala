@@ -20,27 +20,26 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   // Create a heap tree 
   //--------------------------------------------------------------------------------
   def genNode(level: Int): Gen[H] = for {
-    i <- arbitrary[Int]
-    h <- oneOf(const(this.empty), const(insert(i, this.empty)), genNode(level + 1))
-    //h <- oneOf(const(insert(i, this.empty)), genNode(level + 1))
+    i <- arbitrary[A]
+    //h <- oneOf(const(this.empty), const(insert(i, this.empty)), genNode(level + 1))
+    h <- oneOf(const(insert(i, this.empty)), genNode(level + 1))
   } yield {
-    //    for(i <- (0 until level)) print("\t")
-    //    println("level [%d] adding %s".format(level, h)) 
-    meld(empty, h)
+    //meld(empty, h)
+    h
   }
   lazy val genHeap: Gen[H] = {
     genNode(0)
   }
 
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
-
+  
   property("gen1") = forAll(genHeap) { (h: H) =>
     val m = if (isEmpty(h)) 0 else findMin(h)
     findMin(insert(m, h)) == m
   }
-
-  property("two elements to verify min of them") = {
-    findMin(insert(2, insert(1, empty))) == 1
+  
+  property("two elements to verify min of them") = forAll(genHeap){ (h: H) =>
+    insert(Int.MinValue, h) == Int.MinValue
   }
 
   property("add then delete it") = {
@@ -50,12 +49,9 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   property("min of melding") = forAll(genHeap, genHeap) {
     (f: H, s: H) =>
       {
-        if (isEmpty(f) && isEmpty(s)) false
-        else {
-          val fm = if (isEmpty(f)) findMin(s) else findMin(f)
-          val sm = if (isEmpty(s)) findMin(f) else findMin(s)
+          val fm = findMin(f)
+          val sm = findMin(s)
           findMin(meld(f, s)) == Math.min(fm, sm)
-        }
       }
   }
 

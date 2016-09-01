@@ -10,55 +10,71 @@ import quickcheck._
 
 abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
 
-  lazy val genMap: Gen[Map[A, A]] = for {
-    k <- arbitrary[A]
-    v <- arbitrary[A]
-    m <- oneOf(const(Map.empty[A, A]), genMap)
-  } yield m.updated(k, v)
-
   //--------------------------------------------------------------------------------
   // Create a heap tree 
   //--------------------------------------------------------------------------------
-  def genNode(level: Int): Gen[H] = for {
+  def gen(level: Int): Gen[H] = for {
     i <- arbitrary[A]
-    //h <- oneOf(const(this.empty), const(insert(i, this.empty)), genNode(level + 1))
-    h <- oneOf(const(insert(i, this.empty)), genNode(level + 1))
-  } yield {
-    //meld(empty, h)
-    h
-  }
-  lazy val genHeap: Gen[H] = {
-    genNode(0)
-  }
+    //i <- arbitrary[A] if (i > Int.MinValue)
+    //i <- arbitrary[A] if (0 && i < Int.MaxValue) // Causes Gave up after 3 successful property evaluations. 98 evaluations were discarded.
+    //i <- arbitrary[A] if (Int.MinValue < i && i < Int.MaxValue)
+    h <- oneOf(const(this.empty), gen(level + 1))
+  } yield insert(i, h)
 
+  lazy val genHeap: Gen[H] = gen(0)
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
-  
+
+  println("gen1")
   property("gen1") = forAll(genHeap) { (h: H) =>
     val m = if (isEmpty(h)) 0 else findMin(h)
     findMin(insert(m, h)) == m
   }
-  
-  property("two elements to verify min of them") = forAll(genHeap){ (h: H) =>
-    insert(Int.MinValue, h) == Int.MinValue
-  }
 
-  property("add then delete it") = {
+  println("Add the deleten")
+  property("On Empty, add then delete it is empty") = {
     isEmpty(deleteMin(insert(1, empty)))
   }
+  
+  println("Add two on empty the deleten")
+  property("Add two on Empty") = {
+    findMin(insert(2, insert(1, empty))) == 1
+  }
 
-  property("min of melding") = forAll(genHeap, genHeap) {
-    (f: H, s: H) =>
-      {
-          val fm = findMin(f)
-          val sm = findMin(s)
-          findMin(meld(f, s)) == Math.min(fm, sm)
+  println("delete min the no more that min")
+  property("Delete min then no more that min") = forAll(genHeap) { (h: H) =>
+    if (isEmpty(h)) false
+    else {
+      val rest = deleteMin(h)
+      if (isEmpty(rest)) true
+      else findMin(rest) >= findMin(h)
+    }
+  }
+
+  println("min of meld")
+  property("Min of melding is the same with that of being melded") = forAll(genHeap, genHeap) {
+    (f: H, s: H) => findMin(meld(f, s)) == Math.min(findMin(f), findMin(s))
+  }
+
+  property("First min is the minist of all") = forAll(genHeap) {
+    (h: H) =>
+      if (isEmpty(h)) false
+      else {
+        val theMin = findMin(h)
+        assureMin(theMin, deleteMin(h))
       }
+  }
+  def assureMin(theMin: Int, rest: H): Boolean = {
+    if (isEmpty(rest)) true
+    else {
+      if (findMin(rest) < theMin) false
+      else assureMin(theMin, deleteMin(rest))
+    }
   }
 
   property("sorted") = forAll(genHeap) {
     (h: H) =>
-      if (isEmpty(h)) true
-      else checkSorted(findMin(h), h)
+      if (isEmpty(h)) false
+      else checkSorted(findMin(h), deleteMin(h))
   }
   def checkSorted(prev: Int, h: H): Boolean = {
     if (isEmpty(h)) true
@@ -66,6 +82,18 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
       val cur = findMin(h)
       if (prev > cur) false
       else checkSorted(cur, deleteMin(h))
+    }
+  }
+  
+  property("add and delete all") = {
+    val h = ((0 until 1000).toList).foldLeft(empty)((heap, i) => insert(i, heap))
+    checkAll(0, h)
+  }
+  def checkAll(min: Int, heap: H): Boolean = {
+    if(isEmpty(heap)) true
+    else {
+      if(min != findMin(heap)) false
+      else checkAll(min + 1, deleteMin(heap))
     }
   }
 

@@ -9,9 +9,8 @@ import Prop._
 import quickcheck._
 
 abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
-
   //--------------------------------------------------------------------------------
-  // Create a heap tree 
+  // Generator of heap type H.
   //--------------------------------------------------------------------------------
   def gen(level: Int): Gen[H] = for {
     i <- arbitrary[A]
@@ -21,7 +20,10 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
   lazy val genHeap: Gen[H] = gen(0)
   implicit lazy val arbHeap: Arbitrary[H] = Arbitrary(genHeap)
 
-  property("gen1") = forAll(genHeap) { (h: H) =>
+  //--------------------------------------------------------------------------------
+  // ScalaCheck properties to be true.
+  //--------------------------------------------------------------------------------
+  property("min") = forAll(genHeap) { (h: H) =>
     val m = if (isEmpty(h)) 0 else findMin(h)
     findMin(insert(m, h)) == m
   }
@@ -87,5 +89,4 @@ abstract class QuickCheckHeap extends Properties("Heap") with IntHeap {
       else checkAll(min + 1, deleteMin(heap))
     }
   }
-
 }

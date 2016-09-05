@@ -9,7 +9,7 @@ object Polynomial {
                        c: Signal[Double], delta: Signal[Double]): Signal[Set[Double]] = {
     //if (a() == 0) throw new IllegalArgumentException("argument a is zero causing div by zero")
     Signal(
-      if (delta() < 0) Set(0)
+      if (delta() < 0) Set()
       else {
         Set(
           ((-b() + Math.sqrt(delta())) / (2 * a())),

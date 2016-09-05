@@ -13,7 +13,7 @@ object Polynomial {
       else {
         Set(
           ((-b() + Math.sqrt(delta())) / (2 * a())),
-          ((-b() + Math.sqrt(delta())) / (2 * a())))
+          ((-b() - Math.sqrt(delta())) / (2 * a())))
       })
   }
 }

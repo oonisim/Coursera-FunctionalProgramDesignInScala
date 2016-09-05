@@ -7,7 +7,7 @@ object Polynomial {
 
   def computeSolutions(a: Signal[Double], b: Signal[Double],
                        c: Signal[Double], delta: Signal[Double]): Signal[Set[Double]] = {
-    if (a() == 0) throw new IllegalArgumentException("argument a is zero causing div by zero")
+    //if (a() == 0) throw new IllegalArgumentException("argument a is zero causing div by zero")
     Signal(
       if (delta() < 0) Set(0)
       else {

@@ -9,14 +9,26 @@ object TweetLength {
   final val MaxTweetLength = 140
 
   def tweetRemainingCharsCount(tweetText: Signal[String]): Signal[Int] = {
-    Signal(Math.max((MaxTweetLength - tweetLength(tweetText())), 0))
+    //Signal(Math.max((MaxTweetLength - tweetLength(tweetText())), 0))
+    Signal(MaxTweetLength - tweetLength(tweetText()))
   }
 
   def colorForRemainingCharsCount(remainingCharsCount: Signal[Int]): Signal[String] = {
-    ???
+    val THRESHOLD_GREEN = 15
+    val THRESHOLD_RED = 0
+    val COLOR_GREEN = "green"
+    val COLOR_RED = "red"
+    val COLOR_ORANGE = "orange"
+    Signal(
+    remainingCharsCount() match {
+      case x if x >= THRESHOLD_GREEN => COLOR_GREEN 
+      case x if x >= THRESHOLD_RED   => COLOR_ORANGE
+      case other => COLOR_RED
+    })
   }
 
-  /** Computes the length of a tweet, given its text string.
+  /**
+   * Computes the length of a tweet, given its text string.
    *  This is not equivalent to text.length, as tweet lengths count the number
    *  of Unicode *code points* in the string.
    *  Note that this is still a simplified view of the reality. Full details
@@ -30,7 +42,7 @@ object TweetLength {
     if (text.isEmpty) 0
     else {
       text.length - text.init.zip(text.tail).count(
-          (Character.isSurrogatePair _).tupled)
+        (Character.isSurrogatePair _).tupled)
     }
   }
 }
